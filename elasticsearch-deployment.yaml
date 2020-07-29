@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/1/./kompose-linux-amd64 convert
+    kompose.version: 1.18.0 (06a2e56)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: elasticsearch
+  name: elasticsearch
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: elasticsearch
+    spec:
+      containers:
+      - env:
+        - name: ES_JAVA_OPTS
+          value: '-Xmx1G '
+        - name: bootstrap.memory_lock
+          value: "true"
+        - name: cluster.initial_master_nodes
+          value: odfe-node1
+        - name: cluster.name
+          value: odfe-cluster
+        - name: discovery.seed_hosts
+          value: localhost
+        - name: node.name
+          value: odfe-node1
+        image: amazon/opendistro-for-elasticsearch:1.6.0
+        name: elasticsearch
+        resources: {}
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: esdata
+      restartPolicy: Always
+      volumes:
+      - name: esdata
+        persistentVolumeClaim:
+          claimName: esdata
+status: {}

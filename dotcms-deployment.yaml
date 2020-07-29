@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/1/./kompose-linux-amd64 convert
+    kompose.version: 1.18.0 (06a2e56)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: dotcms
+  name: dotcms
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: dotcms
+    spec:
+      containers:
+      - env:
+        - name: CMS_HEAP_SIZE
+          value: 1g
+        - name: CMS_JAVA_OPTS
+          value: -XX:+PrintFlagsFinal
+        - name: CUSTOM_STARTER_URL
+          value: https://repo.dotcms.com/artifactory/libs-release-local/com/dotcms/starter/20200512/starter-20200512.zip
+        - name: ES_ADMIN_PASSWORD
+          value: admin
+        - name: PROVIDER_DB_DNSNAME
+          value: db
+        - name: PROVIDER_ELASTICSEARCH_DNSNAMES
+          value: elasticsearch
+        image: dotcms/dotcms:latest
+        name: dotcms
+        ports:
+        - containerPort: 8081
+        - containerPort: 8082
+        resources: {}
+        volumeMounts:
+        - mountPath: /data/shared
+          name: cms-shared
+      restartPolicy: Always
+      volumes:
+      - name: cms-shared
+        persistentVolumeClaim:
+          claimName: cms-shared
+status: {}
